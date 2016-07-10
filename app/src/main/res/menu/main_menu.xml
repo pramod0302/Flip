@@ -4,6 +4,8 @@
         android:title="Reset Count"/>
     <item  android:id="@+id/set"
         android:title="Set Count"/>
+    <item  android:id="@+id/check"
+        android:title="Check Count"/>
     <item  android:id="@+id/help"
         android:title="Help"/>
 </menu>

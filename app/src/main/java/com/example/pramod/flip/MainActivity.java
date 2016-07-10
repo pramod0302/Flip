@@ -9,6 +9,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
@@ -33,6 +34,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
         countText = (TextView) findViewById(R.id.count_value);
         param = new Params();
+
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
+        wl.acquire();
 
         // Get instance of Vibrator from current Context
         v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -70,22 +75,38 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
             return true;
             case R.id.set: {
-                final EditText taskEditText = new EditText(this);
-                taskEditText.setInputType(InputType.TYPE_CLASS_NUMBER);
-                taskEditText.setRawInputType(Configuration.KEYBOARD_12KEY);
+                {
+                    final EditText taskEditText = new EditText(this);
+                    taskEditText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    taskEditText.setRawInputType(Configuration.KEYBOARD_12KEY);
+
+                    AlertDialog dialog = new AlertDialog.Builder(this)
+                            .setTitle("Set the count")
+                            .setMessage("Set the count at which the alert is required")
+                            .setView(taskEditText)
+                            .setPositiveButton("Set", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    param.setCount_limit(Integer.parseInt(String.valueOf(taskEditText.getText())));
+                                }
+                            })
+                            .setNegativeButton("No", null)
+                            .create();
+                    dialog.show();
+                }
+            }
+                return true;
+            case R.id.check:
                 AlertDialog dialog = new AlertDialog.Builder(this)
-                        .setTitle("Add a new task")
-                        .setMessage("What do you want to do next?")
-                        .setView(taskEditText)
-                        .setPositiveButton("Set", new DialogInterface.OnClickListener() {
+                        .setTitle("Count value is " + param.getCount_limit().toString())
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                     //           param.setCount((taskEditText.getText()));
+                                countText.setText("0");
                             }
                         })
-                        .setNegativeButton("No", null)
                         .create();
-            }
+                dialog.show();
                 return true;
             case R.id.help:
                 return true;
@@ -122,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             lastUpdate = false;
             param.increment_count();
             countText.setText(Integer.toString(param.getCount()));
-            // Vibrate for 400 milliseconds
+            // Vibrate for 50 milliseconds
             v.vibrate(50);
         }
         else if((lastUpdate == false) && (z < 0)) {
@@ -133,8 +154,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             lastUpdate = true;
             param.increment_count();
             countText.setText(Integer.toString(param.getCount()));
-            // Vibrate for 400 milliseconds
+            // Vibrate for 50 milliseconds
             v.vibrate(50);
+        }
+
+        if(param.getCount() >= param.getCount_limit()) {
+            param.setCount(0);
+            v.vibrate(4000);
+            AlertDialog dialog = new AlertDialog.Builder(this)
+                    .setTitle("Session Complete!!!")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            countText.setText("0");
+                        }
+                    })
+                    .create();
+            dialog.show();
         }
     }
 }
