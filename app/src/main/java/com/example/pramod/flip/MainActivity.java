@@ -3,6 +3,7 @@ package com.example.pramod.flip;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -20,6 +21,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
+    private static final String msg  = "MainActivity";
     private SensorManager sensorManager;
     private boolean color = false;
     private View view;
@@ -28,15 +30,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     TextView countText;
     Vibrator v;
     Params param;
+    PowerManager pm;
+    PowerManager.WakeLock wl;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         setContentView(R.layout.activity_main);
         countText = (TextView) findViewById(R.id.count_value);
         param = new Params();
 
-        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
+        pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
         wl.acquire();
 
         // Get instance of Vibrator from current Context
@@ -47,6 +53,35 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         lastTime = System.currentTimeMillis();
     }
+
+    /** Called when the activity is about to become visible. */
+    @Override
+    protected void onStart() {
+        super.onStart();
+        wl.acquire();
+    }
+
+    /** Called when the activity has become visible. */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        wl.acquire();
+    }
+
+    /** Called when another activity is taking focus. */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        wl.release();
+    }
+
+    /** Called when the activity is no longer visible. */
+    @Override
+    protected void onStop() {
+        super.onStop();
+        wl.release();
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -109,6 +144,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 dialog.show();
                 return true;
             case R.id.help:
+                Intent i = new Intent(getApplicationContext(),HelpActivity.class);
+                startActivity(i);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
