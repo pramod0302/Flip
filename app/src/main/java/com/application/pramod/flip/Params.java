@@ -1,4 +1,4 @@
-package com.example.pramod.flip;
+package com.application.pramod.flip;
 
 /**
  * Created by pramod on 10-07-2016.

@@ -1,4 +1,4 @@
-package com.example.pramod.flip;
+package com.application.pramod.flip;
 
 import org.junit.Test;
 

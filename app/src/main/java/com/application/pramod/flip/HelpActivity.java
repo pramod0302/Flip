@@ -1,4 +1,4 @@
-package com.example.pramod.flip;
+package com.application.pramod.flip;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
